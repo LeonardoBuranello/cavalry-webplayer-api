@@ -1,7 +1,8 @@
 :root {
-    --bg-dark: #121212;
+    --bg-dark: #ff69eb;
     --panel-bg: #ffffff;
     --accent: #001226;
+    --button: #ff69eb;
     --text: #001226;
 }
 
@@ -59,7 +60,7 @@ canvas {
 }
 
 button {
-    background: #fdc5f5;
+    background: var(--button);
     border: none;
     color: white;
     padding: 10px 15px;
@@ -69,7 +70,7 @@ button {
     transition: background 0.2s;
 }
 
-button:hover { background: #f7aef8; }
+button:hover { background: #f038ff; }
 #btn-play { background: var(--accent); }
 
 .slider-container input {
