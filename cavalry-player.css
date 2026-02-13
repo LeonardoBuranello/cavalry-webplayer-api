@@ -90,6 +90,8 @@ button:hover { background: #f038ff; }
 
 .control-group {
     margin-bottom: 15px;
+    padding: 16px;
+    border-radius: 4px;
 }
 
 .control-label {
@@ -98,13 +100,16 @@ button:hover { background: #f038ff; }
     margin-bottom: 5px;
 }
 
+
+// MACCHIE GIRAFFA BOX
+
 .control-input {
     width: 100%;
     background: #2a2a2a;
     border: 1px solid #444;
     color: white;
-    padding: 16px;
-    border-radius: 8px;
+    padding: 8px;
+    border-radius: 4px;
 }
 
 
