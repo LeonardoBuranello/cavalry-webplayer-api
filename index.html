@@ -2,15 +2,25 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Cavalry Player - Test</title>
+    <title>Cavalry Player - Live</title>
     <link rel="stylesheet" href="cavalry-player.css">
     <script type="module" src="CavalryPlayer.js"></script>
     <style>
         body { margin: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        cavalry-player { width: 800px; height: 600px; background: #000; display: block; }
+        cavalry-player { width: 800px; height: 600px; background: #000; }
     </style>
 </head>
 <body>
-    <cavalry-player src="./scene.cv" control-centre="true"></cavalry-player>
+
+    <cavalry-player id="myPlayer" src="scene.cv" control-centre="true"></cavalry-player>
+
+    <script type="module">
+        // Forza il player a trovare la cartella wasm-lib correttamente su GitHub
+        const player = document.getElementById('myPlayer');
+        player.config = {
+            locateFile: (path) => `./wasm-lib/${path}`
+        };
+    </script>
+
 </body>
 </html>
