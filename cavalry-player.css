@@ -106,3 +106,46 @@ button:hover { background: #f038ff; }
     padding: 5px;
     border-radius: 4px;
 }
+
+
+
+//Aggiunta 
+
+/* --- STILIZZAZIONE SLIDER (Timeline e Control Centre) --- */
+
+/* 1. La Barra (Track) */
+input[type=range] {
+    -webkit-appearance: none; /* Rimuove lo stile di default */
+    width: 100%;
+    background: transparent;
+}
+
+/* Colore della traccia su cui scorre il pallino */
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: #eee; /* Grigio chiarissimo per contrasto sul bianco */
+    border-radius: 3px;
+}
+
+/* 2. Il Pallino (Thumb) */
+input[type=range]::-webkit-slider-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: var(--accent); /* Il tuo blu scuro #001226 */
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -6px; /* Centra il pallino rispetto alla barra */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease;
+}
+
+/* Effetto al passaggio del mouse sul pallino */
+input[type=range]:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+    background: var(--button); /* Diventa rosa quando lo trascini */
+}
+
+
