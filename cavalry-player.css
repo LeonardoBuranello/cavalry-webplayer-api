@@ -62,7 +62,7 @@ canvas {
 button {
     background: var(--button);
     border: none;
-    color: white;
+    color: var(--accent);
     padding: 10px 15px;
     border-radius: 6px;
     cursor: pointer;
@@ -71,7 +71,7 @@ button {
 }
 
 button:hover { background: #f038ff; }
-#btn-play { background: var(--accent); }
+#btn-play { background: var(--accent); color: #ffffff; }
 
 .slider-container input {
     width: 100%;
