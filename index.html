@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Cavalry Player - Live</title>
+    <title>Cavalry Live Test</title>
     <link rel="stylesheet" href="cavalry-player.css">
     <script type="module" src="CavalryPlayer.js"></script>
     <style>
@@ -12,12 +12,12 @@
 </head>
 <body>
 
-    <cavalry-player id="myPlayer" src="scene.cv" control-centre="true"></cavalry-player>
+    <cavalry-player id="mainPlayer" src="./scene.cv" control-centre="true"></cavalry-player>
 
     <script type="module">
-        // Forza il player a trovare la cartella wasm-lib correttamente su GitHub
-        const player = document.getElementById('myPlayer');
-        player.config = {
+        // Questo risolve l'errore 404 della cartella wasm-lib su server online
+        const cp = document.getElementById('mainPlayer');
+        cp.config = {
             locateFile: (path) => `./wasm-lib/${path}`
         };
     </script>
