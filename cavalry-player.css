@@ -107,3 +107,50 @@ button:hover { background: #f038ff; }
     border-radius: 4px;
 }
 
+
+
+
+//PERSONALIZZAZIONE CHECK BUTTON
+
+/* Ingrandimento e stile del Checkbox */
+input[type="checkbox"].control-input {
+    -webkit-appearance: none; /* Rimuove lo stile di default di Safari/Chrome */
+    appearance: none;
+    
+    width: 32px;  /* Larghezza desiderata */
+    height: 32px; /* Altezza desiderata */
+    
+    background-color: #f0f0f0; /* Grigio chiaro per lo stato vuoto */
+    border: 2px solid #ddd;
+    border-radius: 8px; /* Angoli leggermente arrotondati */
+    
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Effetto quando il checkbox è selezionato (Checked) */
+input[type="checkbox"].control-input:checked {
+    background-color: #000000; /* Diventa nero quando attivo */
+    border-color: #000000;
+}
+
+/* Aggiunge la spunta bianca quando è attivo */
+input[type="checkbox"].control-input:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 20px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); /* Centra perfettamente la spunta */
+}
+
+/* Effetto Hover (quando ci passi sopra col mouse) */
+input[type="checkbox"].control-input:hover {
+    border-color: #ff69eb; /* Diventa rosa al passaggio */
+}
+
+
