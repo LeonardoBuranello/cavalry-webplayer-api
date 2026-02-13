@@ -1,4 +1,4 @@
-// 1. IMPORT DEL MOTORE (Percorsi relativi corretti per il tuo repository)
+// 1. IMPORT DEL MOTORE (Percorsi relativi corretti)
 const wasm = await import('./wasm-lib/CavalryWasm.js')
 
 const module = await wasm.default({
@@ -26,7 +26,7 @@ export class CavalryPlayer {
 		parent.innerHTML = ''
 		parent.appendChild(ui)
 
-		// Collegamento dei pulsanti tramite i nuovi ID
+		// Collegamento dei pulsanti tramite ID
 		ui.querySelector('#btn-play').addEventListener('click', () => this.togglePlayback())
 		ui.querySelector('#btn-restart').addEventListener('click', () => this.restart())
 		ui.querySelector('#btn-prev').addEventListener('click', () => this.prev())
@@ -38,13 +38,13 @@ export class CavalryPlayer {
 		this.#container = ui.querySelector('#player-canvas-container')
 		this.canvas = ui.querySelector('#canvas')
 		
-		// Necessario per l'inizializzazione del motore grafico
+		// Inizializzazione motore grafico
 		module.specialHTMLTargets['#canvas'] = this.canvas
 		
 		window.addEventListener('resize', () => this.resize())
 	}
 
-	// Metodo per caricare il file .cv (chiamato da app.js)
+	// Metodo per caricare il file .cv
 	async load(url) {
 		const response = await fetch(url)
 		if (!response.ok) throw new Error(`Impossibile caricare la scena: ${response.statusText}`)
@@ -90,7 +90,7 @@ export class CavalryPlayer {
 			this.player = module.Cavalry.MakeWithPath(filename)
 			this.loadControlCentreAttributes()
 			this.setTimelineAttributes()
-			this.resize()
+			this.resize() // Chiamata al resize dopo il caricamento
 			if (this.#options.autoplay) {
 				this.play()
 			}
@@ -164,15 +164,28 @@ export class CavalryPlayer {
 		return input
 	}
 
+	// Metodo Resize Ottimizzato
 	resize() {
-		if (!this.player) return
+		if (!this.player || !this.canvas) return
 		const scene = this.player.getSceneResolution()
 		const parent = this.canvas.parentElement
-		const scale = Math.min(parent.offsetWidth / scene.width, parent.offsetHeight / scene.height)
+		
+		if (!parent) return
+
+		// Calcola la scala lasciando un margine del 10% (0.9)
+		const scale = Math.min(
+			(parent.offsetWidth * 0.9) / scene.width, 
+			(parent.offsetHeight * 0.9) / scene.height
+		)
+		
 		this.canvas.width = scene.width * scale
 		this.canvas.height = scene.height * scale
+		
 		this.#surface = module.makeWebGLSurfaceFromElement(this.canvas, this.canvas.width, this.canvas.height)
-		if (!this.player.isPlaying()) this.render()
+		
+		if (!this.player.isPlaying()) {
+			this.render()
+		}
 	}
 
 	setTimelineAttributes() {
@@ -191,6 +204,7 @@ export class CavalryPlayer {
 	}
 
 	play() {
+		if (!this.player) return
 		this.player.play()
 		this.#playButton.innerText = 'Pause'
 		const tick = (timestamp) => {
@@ -203,25 +217,43 @@ export class CavalryPlayer {
 	}
 
 	stop() {
+		if (!this.player) return
 		this.player.stop()
 		this.#playButton.innerText = 'Play'
-		cancelAnimationFrame(this.#animationFrameId)
+		if (this.#animationFrameId) {
+			cancelAnimationFrame(this.#animationFrameId)
+		}
 	}
 
 	restart() {
+		if (!this.player) return
 		this.player.setFrame(0)
 		this.#timeline.value = 0
 		this.render()
 	}
 
-	prev() { this.player.setFrame(this.player.getCurrentFrame() - 1); this.render(); }
-	next() { this.player.setFrame(this.player.getCurrentFrame() + 1); this.render(); }
+	prev() { 
+		if (!this.player) return
+		this.player.setFrame(this.player.getCurrentFrame() - 1)
+		this.render() 
+	}
+	
+	next() { 
+		if (!this.player) return
+		this.player.setFrame(this.player.getCurrentFrame() + 1)
+		this.render() 
+	}
 
-	render() { this.player.render(this.#surface) }
+	render() { 
+		if (this.player && this.#surface) {
+			this.player.render(this.#surface) 
+		}
+	}
 
 	showPlayerError(message) {
 		const div = document.createElement('div')
 		div.className = 'player-error'
+		div.style.color = "red"
 		div.innerText = `Errore: ${message}`
 		this.#container.prepend(div)
 	}
@@ -229,5 +261,4 @@ export class CavalryPlayer {
 
 function vectorToArray(vector) {
 	if (typeof vector?.size !== 'function') return []
-	return new Array(vector.size()).fill(0).map((_, index) => vector.get(index))
-}
+	return new Array(vector.size()).fill(0).map((_, index) => vector.get
