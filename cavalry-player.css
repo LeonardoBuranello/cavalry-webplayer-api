@@ -103,8 +103,8 @@ button:hover { background: #f038ff; }
     background: #2a2a2a;
     border: 1px solid #444;
     color: white;
-    padding: 5px;
-    border-radius: 4px;
+    padding: 16px;
+    border-radius: 8px;
 }
 
 
