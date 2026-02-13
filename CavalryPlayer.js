@@ -1,13 +1,9 @@
-// CORREZIONE: Abbiamo cambiato i percorsi da '/cavalry-demos/wasm-lib/' a './wasm-lib/'
+// 1. IMPORT DEL MOTORE (Percorsi relativi corretti per il tuo repository)
 const wasm = await import('./wasm-lib/CavalryWasm.js')
 
-// Configure and create the module instance
 const module = await wasm.default({
-	// CORREZIONE: Anche qui puntiamo alla cartella relativa corretta
 	locateFile: (path) => `./wasm-lib/${path}`,
-	// Set info logging function
 	print: (text) => console.log(text),
-	// Set error logging function
 	printErr: (text) => console.error(text),
 })
 
@@ -25,89 +21,63 @@ export class CavalryPlayer {
 
 	constructor(parent, options = {}) {
 		this.#options.autoplay = options.autoplay ?? true
-		this.#options.sceneInput = options.sceneInput ?? true
-		const canvasId = '#canvas'
+		
 		const ui = this.createInterface()
-		this.#controls = ui.querySelector('#controls')
-		this.#container = ui.querySelector('#container')
-		this.#timeline = ui.querySelector('#frameSlider')
-		this.canvas = ui.querySelector(canvasId)
-		// This allows WASM to find the canvas when it's in shadow DOM
-		module.specialHTMLTargets[canvasId] = this.canvas
-		this.canvas.addEventListener(
-			'webglcontextlost',
-			() => this.showPlayerError('WebGL context lost'),
-			false,
-		)
-
-		const restartButton = ui.querySelector('#restartButton')
-		restartButton?.addEventListener('click', () => this.restart())
-
-		const playButton = ui.querySelector('#playButton')
-		playButton?.addEventListener('click', () => this.togglePlayback())
-		this.#playButton = playButton
-
-		const prevButton = ui.querySelector('#prevButton')
-		prevButton?.addEventListener('click', () => this.prev())
-
-		const nextButton = ui.querySelector('#nextButton')
-		nextButton?.addEventListener('click', () => this.next())
-
-		const sceneInput = ui.querySelector('#sceneInput')
-		sceneInput?.addEventListener('change', async ({ target }) => {
-			const file = target.files[0]
-			const contents = await file.arrayBuffer()
-			await this.loadScene(new Uint8Array(contents), file.name)
-		})
-
-		window.addEventListener('resize', (event) => this.resize(event))
 		parent.innerHTML = ''
 		parent.appendChild(ui)
+
+		// Collegamento dei pulsanti tramite i nuovi ID
+		ui.querySelector('#btn-play').addEventListener('click', () => this.togglePlayback())
+		ui.querySelector('#btn-restart').addEventListener('click', () => this.restart())
+		ui.querySelector('#btn-prev').addEventListener('click', () => this.prev())
+		ui.querySelector('#btn-next').addEventListener('click', () => this.next())
+		
+		this.#playButton = ui.querySelector('#btn-play')
+		this.#timeline = ui.querySelector('#frame-slider')
+		this.#controls = ui.querySelector('#dynamic-controls')
+		this.#container = ui.querySelector('#player-canvas-container')
+		this.canvas = ui.querySelector('#canvas')
+		
+		// Necessario per l'inizializzazione del motore grafico
+		module.specialHTMLTargets['#canvas'] = this.canvas
+		
+		window.addEventListener('resize', () => this.resize())
 	}
 
-    // Funzione aggiunta per caricare un file specifico all'avvio (come scene.cv)
-    async load(url) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Impossibile caricare la scena: ${response.statusText}`);
-        const contents = await response.arrayBuffer();
-        await this.loadScene(new Uint8Array(contents), url.split('/').pop());
-    }
+	// Metodo per caricare il file .cv (chiamato da app.js)
+	async load(url) {
+		const response = await fetch(url)
+		if (!response.ok) throw new Error(`Impossibile caricare la scena: ${response.statusText}`)
+		const contents = await response.arrayBuffer()
+		await this.loadScene(new Uint8Array(contents), url.split('/').pop())
+	}
 
 	createInterface() {
 		const container = document.createElement('div')
-		container.className = 'demo-layout'
+		container.className = 'player-ui-root'
 		container.innerHTML = `
-			<div class="viewport-section">
-				<div id="container" class="player-container">
+			<div class="main-layout">
+				<div id="player-canvas-container" class="canvas-area">
 					<canvas id="canvas"></canvas>
 				</div>
-			</div>
-
-			<div class="controls-section">
-				${
-					this.#options.sceneInput === false
-						? ''
-						: `<div class="control-group">
-						<div class="file-input-wrapper">
-							<input type="file" accept=".cv" id="sceneInput" class="file-input" />
-							<div class="file-input-button">Carica File .cv</div>
-						</div>
-					</div>`
-				}
-
-				<div class="timeline-controls">
-					<div>
-						<button id="restartButton">⏮</button>
-						<button id="playButton">Play</button>
-						<button id="prevButton">◀︎</button>
-						<button id="nextButton">▶︎</button>
+				
+				<div class="sidebar">
+					<div class="toolbar">
+						<button id="btn-restart" title="Ricomincia">⏮</button>
+						<button id="btn-prev">◀</button>
+						<button id="btn-play">Pause</button>
+						<button id="btn-next">▶</button>
 					</div>
-					<input type="range" id="frameSlider" value="0" min="0" max="100" step="1" />
-				</div>
+					
+					<div class="slider-container">
+						<input type="range" id="frame-slider" value="0">
+					</div>
 
-				<div id="controls" class="dynamic-controls"></div>
+					<div class="control-centre-header">Control Centre</div>
+					<div id="dynamic-controls" class="controls-grid"></div>
+				</div>
 			</div>
-    `
+		`
 		return container
 	}
 
@@ -118,12 +88,6 @@ export class CavalryPlayer {
 			}
 			module.FS.writeFile(filename, contents)
 			this.player = module.Cavalry.MakeWithPath(filename)
-			if (module.pendingAssets?.length) {
-				const assets = module.pendingAssets.map((asset) =>
-					this.loadPendingAssets(asset, assetsPath),
-				)
-				await Promise.all(assets)
-			}
 			this.loadControlCentreAttributes()
 			this.setTimelineAttributes()
 			this.resize()
@@ -137,18 +101,12 @@ export class CavalryPlayer {
 	}
 
 	loadControlCentreAttributes() {
-		if (!this.player) {
-			return
-		}
+		if (!this.player) return
 		const compId = this.player.getActiveComp()
 		const attributesPointer = this.player.getControlCentreAttributes(compId)
 		const attributeIds = vectorToArray(attributesPointer)
 		if (!attributeIds.length) {
-			this.#controls.innerHTML = `
-				<div class="no-controls-message">
-					Control Centre vuoto
-				</div>
-			`
+			this.#controls.innerHTML = `<div class="no-controls">Control Centre vuoto</div>`
 			return
 		}
 		const controls = this.createControls(attributeIds)
@@ -157,43 +115,35 @@ export class CavalryPlayer {
 	}
 
 	createControls(attributes = []) {
-		const controls = document.createElement('div')
-		controls.style.all = 'inherit'
-
+		const fragment = document.createDocumentFragment()
 		for (const attribute of attributes) {
 			const group = document.createElement('div')
 			group.className = 'control-group'
-
 			const [layerId, ...attr] = attribute.split('.')
 			const attrId = attr.join('.')
-
 			const label = document.createElement('label')
 			label.className = 'control-label'
-			label.textContent =
-				this.player.getAttributeName(layerId, attrId) || attrId
+			label.textContent = this.player.getAttributeName(layerId, attrId) || attrId
 			group.appendChild(label)
-
 			const definition = this.player.getAttributeDefinition(layerId, attrId)
-			let value = this.player.getAttribute(layerId, attrId)
-			
-            const input = this.createControl({
+			const input = this.createControl({
 				type: definition.type,
-				value: value,
+				value: this.player.getAttribute(layerId, attrId),
 				limits: definition.numericInfo,
 				layerId,
 				attrId,
 			})
 			group.appendChild(input)
-			controls.appendChild(group)
+			fragment.appendChild(group)
 		}
-		return controls
+		return fragment
 	}
 
 	createControl({ layerId, attrId, type, value, limits }) {
+		const input = document.createElement('input')
+		input.className = 'control-input'
 		if (type === 'int' || type === 'double') {
-			const input = document.createElement('input')
 			input.type = limits.hasHardMin && limits.hasHardMax ? 'range' : 'number'
-			input.className = 'control-input'
 			input.defaultValue = value
 			input.step = limits.step || (type === 'int' ? 1 : 0.1)
 			input.min = limits.hasHardMin ? limits.hardMin : (limits.hasSoftMin ? limits.softMin : null)
@@ -203,45 +153,26 @@ export class CavalryPlayer {
 				this.player.setAttribute(layerId, attrId, val)
 				if (!this.player.isPlaying()) this.render()
 			})
-			return input
-		}
-
-		if (type === 'bool') {
-			const input = document.createElement('input')
+		} else if (type === 'bool') {
 			input.type = 'checkbox'
-			input.defaultChecked = value
+			input.checked = value
 			input.addEventListener('change', ({ target }) => {
 				this.player.setAttribute(layerId, attrId, target.checked)
 				if (!this.player.isPlaying()) this.render()
 			})
-			return input
 		}
-
-		const span = document.createElement('span')
-		span.innerText = `Tipo '${type}' non supportato in questo esempio`
-		return span
+		return input
 	}
 
 	resize() {
 		if (!this.player) return
 		const scene = this.player.getSceneResolution()
 		const parent = this.canvas.parentElement
-		const scaleX = parent.offsetWidth / scene.width
-		const scaleY = parent.offsetHeight / scene.height
-		const scale = Math.min(scaleX, scaleY)
-		const width = scene.width * scale
-		const height = scene.height * scale
-		this.canvas.width = width
-		this.canvas.height = height
-		this.#surface = module.makeWebGLSurfaceFromElement(this.canvas, width, height)
+		const scale = Math.min(parent.offsetWidth / scene.width, parent.offsetHeight / scene.height)
+		this.canvas.width = scene.width * scale
+		this.canvas.height = scene.height * scale
+		this.#surface = module.makeWebGLSurfaceFromElement(this.canvas, this.canvas.width, this.canvas.height)
 		if (!this.player.isPlaying()) this.render()
-	}
-
-	showPlayerError(message) {
-		const div = document.createElement('div')
-		div.className = 'player-error'
-		div.innerText = `Errore: ${message}`;
-		this.#container.prepend(div)
 	}
 
 	setTimelineAttributes() {
@@ -254,7 +185,14 @@ export class CavalryPlayer {
 		})
 	}
 
-	runPlaybackLoop() {
+	togglePlayback() {
+		if (!this.player) return
+		this.player.isPlaying() ? this.stop() : this.play()
+	}
+
+	play() {
+		this.player.play()
+		this.#playButton.innerText = 'Pause'
 		const tick = (timestamp) => {
 			if (!this.player || !this.player.isPlaying()) return
 			const status = this.player.tick(this.#surface, timestamp)
@@ -264,26 +202,28 @@ export class CavalryPlayer {
 		this.#animationFrameId = requestAnimationFrame(tick)
 	}
 
-	play() {
-		if (!this.player) return
-		this.player.play()
-		this.#playButton.innerText = 'Pause'
-		this.runPlaybackLoop()
-	}
-
 	stop() {
-		if (!this.player) return
 		this.player.stop()
 		this.#playButton.innerText = 'Play'
-		if (this.#animationFrameId !== null) {
-			cancelAnimationFrame(this.#animationFrameId)
-			this.#animationFrameId = null
-		}
+		cancelAnimationFrame(this.#animationFrameId)
 	}
 
-	render() {
-		if (!this.player) return
-		this.player.render(this.#surface)
+	restart() {
+		this.player.setFrame(0)
+		this.#timeline.value = 0
+		this.render()
+	}
+
+	prev() { this.player.setFrame(this.player.getCurrentFrame() - 1); this.render(); }
+	next() { this.player.setFrame(this.player.getCurrentFrame() + 1); this.render(); }
+
+	render() { this.player.render(this.#surface) }
+
+	showPlayerError(message) {
+		const div = document.createElement('div')
+		div.className = 'player-error'
+		div.innerText = `Errore: ${message}`
+		this.#container.prepend(div)
 	}
 }
 
