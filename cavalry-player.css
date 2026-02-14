@@ -1,103 +1,10 @@
-:root {
-    --bg-dark: #ff69eb;
-    --panel-bg: #ffffff;
-    --accent: #001226;
-    --button: #ff69eb;
-    --text: #001226;
-}
-
-body {
-    background-color: var(--bg-dark);
-    color: var(--text);
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.player-ui-root {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-}
-
-.main-layout {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.canvas-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #fdc5f5;
-}
-
 canvas {
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 90%;
+    max-height: 90%;
     background-color: #ffffff;
-    border: 2px solid #f7aef8;
-    border-radius: 32px;
-    box-shadow: 0 0px 85px rgba(247,174,248,1);
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
 
-.sidebar {
-    width: 320px;
-    background: var(--panel-bg);
-    border-left: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-}
-
-/* Contenitore esterno */
-.color-picker-custom {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 44px !important;
-    height: 44px !important;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-/* La "macchia" colore arrotondata (Chrome/Safari/Edge) */
-.color-picker-custom::-webkit-color-swatch {
-    border-radius: 10px;
-    border: 2px solid #001226; /* Il tuo --accent */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-/* La "macchia" colore arrotondata (Firefox - MDN Style) */
-.color-picker-custom::-moz-color-swatch {
-    border-radius: 10px;
-    border: none; /* Rimuove il bordo default di Firefox */
-}
-
-
-.control-group {
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.control-label {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.control-input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
-.toolbar { display: flex; gap: 8px; margin-bottom: 20px; }
-button { background: var(--button); border: none; padding: 10px; border-radius: 6px; cursor: pointer; flex: 1; font-weight: bold; }
-#btn-play { background: var(--accent); color: white; }
+/* Tweakpane appare in alto a destra di default, 
+   non serve scrivere CSS */
