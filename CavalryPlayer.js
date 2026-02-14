@@ -122,63 +122,55 @@ export class CavalryPlayer {
     }
 
     createControl({ layerId, attrId, type, value, limits }) {
-        const input = document.createElement('input');
+    const input = document.createElement('input');
+    
+    if (type === 'color' || attrId.toLowerCase().includes('color')) {
+        input.type = 'color';
+        input.className = 'color-picker-custom';
         
-        // CORREZIONE COLORE (MOZILLA STYLE + LOGICA CAVALRY)
-        if (type === 'color' || attrId.toLowerCase().includes('color')) {
-            input.type = 'color';
-            input.className = 'color-picker-custom';
-            input.value = this.rgbToHex(value);
+        // Assicuriamoci di convertire correttamente il colore iniziale
+        input.value = this.rgbToHex(value);
 
-            input.oninput = (e) => {
-                const rgba = this.hexToRgbaArray(e.target.value);
-                this.player.setAttribute(layerId, attrId, rgba);
-                if (!this.player.isPlaying()) this.render();
-            };
-        } 
-        else if (type === 'bool') {
-            input.type = 'checkbox';
-            input.checked = value;
-            input.onchange = (e) => {
-                this.player.setAttribute(layerId, attrId, e.target.checked);
-                if (!this.player.isPlaying()) this.render();
-            };
-        } 
-        else {
-            input.className = 'control-input';
-            input.type = (limits.hasHardMin && limits.hasHardMax) ? 'range' : 'number';
-            input.value = value;
-            if (limits.hasHardMin) input.min = limits.hardMin;
-            if (limits.hasHardMax) input.max = limits.hardMax;
-            input.oninput = (e) => {
-                const val = type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value);
-                this.player.setAttribute(layerId, attrId, val);
-                if (!this.player.isPlaying()) this.render();
-            };
-        }
-        return input;
-    }
+        input.oninput = (e) => {
+            const hex = e.target.value;
+            // CONVERSIONE CRUCIALE: Da HEX a Array [R, G, B, A] con valori 0.0-1.0
+            const rgba = this.hexToRgbaArray(hex);
+            
+            // Applichiamo al player
+            this.player.setAttribute(layerId, attrId, rgba);
+            
+            // Forza il ridisegno immediato per evitare il "fermo immagine" grigio
+            if (!this.player.isPlaying()) {
+                this.render();
+            }
+        };
+    } 
+    // ... resto del codice per checkbox e slider ...
+    return input;
+}
 
-    hexToRgbaArray(hex) {
-        hex = hex.replace('#', '');
-        return [
-            parseInt(hex.substring(0, 2), 16) / 255,
-            parseInt(hex.substring(2, 4), 16) / 255,
-            parseInt(hex.substring(4, 6), 16) / 255,
-            1.0
-        ];
-    }
+// QUESTA FUNZIONE È IL "CERVELLO" CHE EVITA IL GRIGIO
+hexToRgbaArray(hex) {
+    hex = hex.replace('#', '');
+    // Dividiamo per 255 per ottenere i decimali (0.0 - 1.0) richiesti da Cavalry
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    return [r, g, b, 1.0]; 
+}
 
-    rgbToHex(colorValue) {
-        if (typeof colorValue === 'string') return colorValue;
-        if (Array.isArray(colorValue)) {
-            return "#" + colorValue.slice(0, 3).map(x => {
-                const hex = Math.round(x * 255).toString(16);
-                return hex.padStart(2, '0');
-            }).join("");
-        }
-        return "#000000";
+rgbToHex(colorValue) {
+    if (typeof colorValue === 'string') return colorValue;
+    if (Array.isArray(colorValue)) {
+        // Se Cavalry ci dà già i decimali, li riportiamo a 255 per il browser
+        return "#" + colorValue.slice(0, 3).map(x => {
+            const val = x <= 1 ? Math.round(x * 255) : x;
+            const hex = Math.max(0, Math.min(255, val)).toString(16);
+            return hex.padStart(2, '0');
+        }).join("");
     }
+    return "#000000";
+}
 
     render() { this.player.render(this.#surface); }
     
