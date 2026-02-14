@@ -132,29 +132,26 @@ export class CavalryPlayer {
 	}
 
 	createControl({ layerId, attrId, type, value, limits }) {
-		const input = document.createElement('input')
-		input.className = 'control-input'
-		if (type === 'int' || type === 'double') {
-			input.type = limits.hasHardMin && limits.hasHardMax ? 'range' : 'number'
-			input.defaultValue = value
-			input.step = limits.step || (type === 'int' ? 1 : 0.1)
-			if (limits.hasHardMin) input.min = limits.hardMin
-			if (limits.hasHardMax) input.max = limits.hardMax
-			input.oninput = (e) => {
-				const val = type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value)
-				this.player.setAttribute(layerId, attrId, val)
-				if (!this.player.isPlaying()) this.render()
-			}
-		} else if (type === 'bool') {
-			input.type = 'checkbox'
-			input.checked = value
-			input.onchange = (e) => {
-				this.player.setAttribute(layerId, attrId, e.target.checked)
-				if (!this.player.isPlaying()) this.render()
-			}
-		}
-		return input
-	}
+    const input = document.createElement('input');
+    input.className = 'control-input';
+
+    // "Color" RGB picker/selector
+		
+    if (type === 'color' || attrId.toLowerCase().includes('color')) {
+        input.type = 'color';
+        input.style.height = '40px'; // Lo rende un bel tastone colorato
+        input.oninput = (e) => {
+            this.player.setAttribute(layerId, attrId, e.target.value);
+            if (!this.player.isPlaying()) this.render();
+        };
+    } 
+    // Altrimenti resta uno slider o un numero
+    else if (type === 'int' || type === 'double') {
+        input.type = limits.hasHardMin && limits.hasHardMax ? 'range' : 'number';
+        // ... resto del codice che hai già ...
+    }
+    return input;
+}
 
 	resize() {
 		if (!this.player || !this.canvas) return
