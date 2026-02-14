@@ -137,42 +137,45 @@ export class CavalryPlayer {
 	createControl({ layerId, attrId, type, value, limits }) {
     const input = document.createElement('input');
     
-    // Checkbox
-		
-    if (type === 'bool') {
+    // --- GESTIONE COLORE ---
+    if (type === 'color' || attrId.toLowerCase().includes('color')) {
+        input.type = 'color';
+        input.className = 'control-input color-picker-custom';
+        
+        // Inizializzazione: se Cavalry manda un array [r,g,b,a], lo convertiamo in HEX per il browser
+        input.value = this.rgbToHex(value);
+
+        input.oninput = (e) => {
+            const hexColor = e.target.value;
+            
+            /* SPIEGAZIONE: Alcune versioni del player Cavalry preferiscono ricevere 
+               il colore come stringa HEX, altre come array. 
+               Proviamo a impostarlo direttamente; se l'animazione non risponde, 
+               Cavalry di solito gestisce la conversione internamente se riceve la stringa corretta.
+            */
+            this.player.setAttribute(layerId, attrId, hexColor);
+            
+            // Forza il refresh immediato del disegno
+            if (!this.player.isPlaying()) {
+                this.render();
+            }
+        };
+    } 
+    // --- GESTIONE CHECKBOX ---
+    else if (type === 'bool') {
         input.type = 'checkbox';
-        input.className = 'control-input checkbox-custom'; // Aggiungiamo una classe extra
+        input.className = 'control-input-checkbox'; // Classe specifica per non subire il width: 100%
         input.checked = value;
         input.onchange = (e) => {
             this.player.setAttribute(layerId, attrId, e.target.checked);
             if (!this.player.isPlaying()) this.render();
         };
     } 
-
-		
-    // Color
-		
-    else if (type === 'color' || attrId.toLowerCase().includes('color')) {
-        input.type = 'color';
-        input.className = 'control-input color-picker-custom';
-        
-        // Convertiamo il valore iniziale da array Cavalry a HEX per il browser
-        input.value = Array.isArray(value) ? this.rgbToHex(value) : value;
-
-        input.oninput = (e) => {
-            // Inviamo il colore a Cavalry
-            this.player.setAttribute(layerId, attrId, e.target.value);
-            if (!this.player.isPlaying()) this.render();
-        };
-    } 
-
-		
-    // Sliders
-
+    // --- GESTIONE SLIDER / NUMERI ---
     else {
         input.className = 'control-input';
-        input.type = limits.hasHardMin && limits.hasHardMax ? 'range' : 'number';
-        input.defaultValue = value;
+        input.type = (limits.hasHardMin && limits.hasHardMax) ? 'range' : 'number';
+        input.value = value;
         if (limits.hasHardMin) input.min = limits.hardMin;
         if (limits.hasHardMax) input.max = limits.hardMax;
         input.step = limits.step || (type === 'int' ? 1 : 0.1);
@@ -186,15 +189,23 @@ export class CavalryPlayer {
     return input;
 }
 
-
-rgbToHex(rgb) {
-    if (!Array.isArray(rgb)) return rgb;
-    return "#" + rgb.slice(0, 3).map(x => {
-        const hex = Math.round(x * 255).toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-    }).join("");
+// Questa funzione deve essere all'interno della classe CavalryPlayer
+rgbToHex(colorValue) {
+    // Se è già una stringa (es. #ffffff), la restituiamo così com'è
+    if (typeof colorValue === 'string') return colorValue;
+    
+    // Se è un array [r, g, b, a] (formato standard Cavalry)
+    if (Array.isArray(colorValue)) {
+        return "#" + colorValue.slice(0, 3).map(x => {
+            // Cavalry usa valori 0.0 - 1.0, il browser 0 - 255
+            const hex = Math.round(x * 255).toString(16);
+            return hex.length === 1 ? "0" + hex : hex;
+        }).join("");
+    }
+    
+    // Valore di default (nero) se il formato è sconosciuto
+    return "#000000";
 }
-
 
 	
 
