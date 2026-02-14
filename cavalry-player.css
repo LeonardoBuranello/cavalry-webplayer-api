@@ -51,31 +51,32 @@ canvas {
     padding: 20px;
 }
 
-/* --- STILE COLOR PICKER (ISPIRATO A MOZILLA MDN) --- */
+/* Contenitore esterno */
 .color-picker-custom {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    width: 50px !important;
-    height: 50px !important;
-    background-color: transparent !important;
-    border: none !important;
+    width: 44px !important;
+    height: 44px !important;
+    background: transparent;
+    border: none;
     cursor: pointer;
-    padding: 0 !important;
-    margin-top: 5px;
+    padding: 0;
 }
 
-/* Macchia interna per Chrome/Safari */
+/* La "macchia" colore arrotondata (Chrome/Safari/Edge) */
 .color-picker-custom::-webkit-color-swatch {
-    border-radius: 12px;
-    border: 3px solid var(--accent);
+    border-radius: 10px;
+    border: 2px solid #001226; /* Il tuo --accent */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Macchia interna per Firefox (MDN style) */
+/* La "macchia" colore arrotondata (Firefox - MDN Style) */
 .color-picker-custom::-moz-color-swatch {
-    border-radius: 12px;
-    border: 3px solid var(--accent);
+    border-radius: 10px;
+    border: none; /* Rimuove il bordo default di Firefox */
 }
+
 
 .control-group {
     margin-bottom: 25px;
