@@ -3,35 +3,23 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Cavalry Player - Editor Giraffa</title>
+        <title>Cavalry Player + Tweakpane Template</title>
+        <script src="https://cdn.jsdelivr.net/npm/tweakpane@3.1.0/dist/tweakpane.min.js"></script>
         <link rel="stylesheet" href="cavalry-player.css" />
         <style>
             body, html { 
-                margin: 0; 
-                padding: 0; 
-                width: 100%; 
-                height: 100%; 
-                overflow: hidden; 
-                background: #121212;
+                margin: 0; padding: 0; width: 100%; height: 100%; 
+                overflow: hidden; background: #121212;
             }
-            #player { 
-                width: 100%; 
-                height: 100%; 
-            }
-            #loading { 
-                position: absolute; 
-                top: 50%; 
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                color: white; 
-                font-family: sans-serif;
-                z-index: 10;
+            #canvas-container { 
+                width: 100%; height: 100%; 
+                display: flex; align-items: center; justify-content: center;
             }
         </style>
     </head>
     <body>
-        <div id="player">
-            <div id="loading">Caricamento giraffa...</div>
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
         </div>
         <script src="app.js" type="module"></script>
     </body>
