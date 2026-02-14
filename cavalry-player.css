@@ -31,8 +31,6 @@ body {
     align-items: center;
     justify-content: center;
     background-color: #fdc5f5;
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
 canvas {
@@ -47,7 +45,7 @@ canvas {
 .sidebar {
     width: 320px;
     background: var(--panel-bg);
-    border-left: 1px solid #333;
+    border-left: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -69,6 +67,7 @@ button {
     cursor: pointer;
     flex: 1;
     transition: background 0.2s;
+    font-weight: bold;
 }
 
 button:hover { background: #f038ff; }
@@ -89,48 +88,43 @@ button:hover { background: #f038ff; }
 }
 
 .control-group {
-    margin-bottom: 15px;
-    padding: 16px;
-    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Fondamentale per non allungare checkbox/color */
 }
 
 .control-label {
     display: block;
     font-size: 13px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
-
-// MACCHIE GIRAFFA BOX
-
+/* Stile per gli SLIDER e input numerici */
 .control-input {
     width: 100%;
-    background: #2a2a2a;
-    border: 1px solid #444;
-    color: white;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
     padding: 8px;
     border-radius: 4px;
 }
 
-
-
-
-/* Sovrascrive il width 100% per gli elementi quadrati */
-input[type="checkbox"].control-input-checkbox,
-input[type="color"].color-picker-custom {
+/* Stile specifico per COLOR PICKER e CHECKBOX */
+.color-picker-custom,
+.control-input-checkbox {
     width: 42px !important;
     height: 42px !important;
-    padding: 2px;
+    padding: 2px !important;
     cursor: pointer;
-    background: #2a2a2a;
-    border: 1px solid #444;
+    background: #ffffff !important;
+    border: 2px solid var(--accent) !important;
+    border-radius: 8px !important;
+    appearance: auto; /* Ripristina l'aspetto cliccabile */
 }
 
-/* Allinea il checkbox al testo della label */
-.control-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+/* Margine extra per il checkbox per distanziarlo se necessario */
+.control-input-checkbox {
+    margin-top: 5px;
 }
-
-
