@@ -1,28 +1,22 @@
 import { CavalryPlayer } from './CavalryPlayer.js';
 
 async function initialise() {
-    const container = document.getElementById('player');
     try {
-        if (!container) {
-            throw new Error('Elemento #player non trovato nell\'HTML');
-        }
+        // 1. Creiamo il player puntando direttamente all'ID del canvas definito nell'HTML
+        const player = new CavalryPlayer('canvas');
 
-        const player = new CavalryPlayer(container, {
-            config: {
-                // Questo forza il browser a cercare nella TUA cartella wasm-lib
-                locateFile: (path) => `./wasm-lib/${path}`
-            },
-            controlCentre: true
-        });
-
-        // Carica finalmente la giraffa
+        // 2. Carichiamo la scena
+        // Assicurati che il file si chiami esattamente scene.cv nella tua cartella principale
         await player.load('./scene.cv');
         
+        // 3. Rimuoviamo il caricamento se presente
         document.getElementById('loading')?.remove();
-        console.log("Cavalry Player inizializzato con successo!");
+        
+        console.log("Cavalry Player + Tweakpane pronti!");
     } catch (error) {
-        console.error("Errore fatale:", error);
-        document.getElementById('loading').innerText = "Errore nel caricamento. Controlla la console.";
+        console.error("Errore durante l'inizializzazione:", error);
+        const loadingEl = document.getElementById('loading');
+        if (loadingEl) loadingEl.innerText = "Errore nel caricamento. Verifica i file .cv e .wasm";
     }
 }
 
