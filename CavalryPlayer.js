@@ -131,27 +131,72 @@ export class CavalryPlayer {
 		return fragment
 	}
 
+
+
+	
 	createControl({ layerId, attrId, type, value, limits }) {
     const input = document.createElement('input');
-    input.className = 'control-input';
-
-    // "Color" RGB picker/selector
+    
+    // Checkbox
 		
-    if (type === 'color' || attrId.toLowerCase().includes('color')) {
+    if (type === 'bool') {
+        input.type = 'checkbox';
+        input.className = 'control-input checkbox-custom'; // Aggiungiamo una classe extra
+        input.checked = value;
+        input.onchange = (e) => {
+            this.player.setAttribute(layerId, attrId, e.target.checked);
+            if (!this.player.isPlaying()) this.render();
+        };
+    } 
+
+		
+    // Color
+		
+    else if (type === 'color' || attrId.toLowerCase().includes('color')) {
         input.type = 'color';
-        input.style.height = '40px'; // Lo rende un bel tastone colorato
+        input.className = 'control-input color-picker-custom';
+        
+        // Convertiamo il valore iniziale da array Cavalry a HEX per il browser
+        input.value = Array.isArray(value) ? this.rgbToHex(value) : value;
+
         input.oninput = (e) => {
+            // Inviamo il colore a Cavalry
             this.player.setAttribute(layerId, attrId, e.target.value);
             if (!this.player.isPlaying()) this.render();
         };
     } 
-    // Altrimenti resta uno slider o un numero
-    else if (type === 'int' || type === 'double') {
+
+		
+    // Sliders
+
+    else {
+        input.className = 'control-input';
         input.type = limits.hasHardMin && limits.hasHardMax ? 'range' : 'number';
-        // ... resto del codice che hai già ...
+        input.defaultValue = value;
+        if (limits.hasHardMin) input.min = limits.hardMin;
+        if (limits.hasHardMax) input.max = limits.hardMax;
+        input.step = limits.step || (type === 'int' ? 1 : 0.1);
+        
+        input.oninput = (e) => {
+            const val = type === 'int' ? parseInt(e.target.value) : parseFloat(e.target.value);
+            this.player.setAttribute(layerId, attrId, val);
+            if (!this.player.isPlaying()) this.render();
+        };
     }
     return input;
 }
+
+
+rgbToHex(rgb) {
+    if (!Array.isArray(rgb)) return rgb;
+    return "#" + rgb.slice(0, 3).map(x => {
+        const hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+    }).join("");
+}
+
+
+	
 
 	resize() {
 		if (!this.player || !this.canvas) return
